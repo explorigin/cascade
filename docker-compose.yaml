@@ -1,0 +1,19 @@
+version: "2"
+services:
+  cascade:
+    build:
+      context: .
+    working_dir: /application
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/application
+    command: 'uvicorn app.main:app --host 0.0.0.0 --port 80 --reload'
+    networks:
+      cascade:
+        aliases:
+          - cascade-dev
+
+networks:
+  cascade:
+    driver: "bridge"
