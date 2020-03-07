@@ -2,6 +2,5 @@ from pydantic import BaseModel
 
 
 class Environment(BaseModel):
-    name: str
+    key: str
     description: str = ''
-

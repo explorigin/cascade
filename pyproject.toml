@@ -8,6 +8,7 @@ authors = ["Tim Farrell <tim@thecookiejar.me>"]
 python = "^3.8"
 fastapi = "^0.49.0"
 uvicorn = "^0.11.3"
+boto3 = "^1.12.12"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

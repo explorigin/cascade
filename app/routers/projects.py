@@ -1,16 +1,21 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
+from ..exceptions import DoesNotExist
 from ..models.project import get, upsert, Project
 
-router = APIRouter()
+router = APIRouter(routes='/project')
 TAGS = ["Project"]
 
 
 @router.get("/{project}", tags=TAGS)
 async def get_project_details(project: str) -> Project:
-    return get(project)
+    try:
+        return get(project)
+    except DoesNotExist as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 @router.put("/", tags=TAGS)
 async def change_project_definition(project: Project) -> Project:
-    return upsert(project)
+    upsert(project)
+    return project

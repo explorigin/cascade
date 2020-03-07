@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
-from ..types import FLAG_VALUE_TYPE, FLAG_REVISIONED_VALUE_TYPE
+from ..cascade_types import FLAG_VALUE_TYPE, FLAG_REVISIONED_VALUE_TYPE
 from ..models.flag import get, get_value, set_value, Flag
 from ..models.project import upsert_flag
 from ..exceptions import DoesNotExist

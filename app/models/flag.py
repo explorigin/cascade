@@ -1,16 +1,30 @@
+from typing import Literal
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel
+from pydantic import validator, BaseModel
 
-from ..types import FLAG_VALUE_TYPE, FLAG_REVISIONED_VALUE_TYPE
+from ..cascade_types import FLAG_VALUE_TYPE, FLAG_REVISIONED_VALUE_TYPE
+
+SUPPORTED_DATATYPES = Literal['bool', 'str', 'int', 'float', 'datetime']
 
 
 class Flag(BaseModel):
     key: str
     name: str
     description: str = ''
-    datatype: str
+    datatype: SUPPORTED_DATATYPES
     default_value: FLAG_VALUE_TYPE
+
+    @validator('default_value')
+    def default_value_as_datatype(cls, v, values):
+        type_name = values['datatype']
+        typ = eval(type_name)
+        if not isinstance(v, typ):
+            try:
+                return typ(v)
+            except (TypeError, ValueError):
+                raise ValueError(f'Cannot convert "{v}" into {type_name}.')
+        return v
 
 
 def get(project_key: str, flag_key: str) -> Flag:

@@ -1,11 +1,43 @@
 version: "2"
 services:
-  cascade:
-    build:
-      context: .
-    working_dir: /application
+  dynamo:
+    image: dwmkerr/dynamodb
     ports:
       - "8000:8000"
+    networks:
+      cascade:
+        aliases:
+          - cascade-dynamo
+  bootstrap:
+    build: ./
+    image: cascade
+    working_dir: /application
+    links:
+      - dynamo
+    environment:
+      AWS_ACCESS_KEY_ID: "default"
+      AWS_SECRET_ACCESS_KEY: "default"
+      AWS_DYNAMO_ENDPOINT: "http://cascade-dynamo:8000"
+    volumes:
+      - ./:/application
+    command: ['python', '-c', 'from debug import bootstrap_tables; bootstrap_tables()']
+    networks:
+      cascade:
+        aliases:
+          - bootstrap
+  cascade:
+    image: cascade
+    working_dir: /application
+    depends_on:
+      - bootstrap
+    links:
+      - dynamo
+    ports:
+      - "80:80"
+    environment:
+      AWS_ACCESS_KEY_ID: "default"
+      AWS_SECRET_ACCESS_KEY: "default"
+      AWS_DYNAMO_ENDPOINT: "http://cascade-dynamo:8000"
     volumes:
       - ./:/application
     command: 'uvicorn app.main:app --host 0.0.0.0 --port 80 --reload'
