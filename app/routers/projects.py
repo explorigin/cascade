@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from ..exceptions import DoesNotExist
+from ..exceptions import DoesNotExist, RevisionMismatch
 from ..models.project import get, upsert, Project
 
 router = APIRouter(routes='/project')
@@ -17,5 +17,8 @@ async def get_project_details(project: str) -> Project:
 
 @router.put("/", tags=TAGS)
 async def change_project_definition(project: Project) -> Project:
-    upsert(project)
+    try:
+        upsert(project)
+    except RevisionMismatch as e:
+        raise HTTPException(status_code=409, detail=str(e))
     return project
