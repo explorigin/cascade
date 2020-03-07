@@ -8,7 +8,7 @@ from ..cascade_types import FLAG_VALUE_TYPE, FLAG_REVISIONED_VALUE_TYPE
 SUPPORTED_DATATYPES = Literal['bool', 'str', 'int', 'float', 'datetime']
 
 
-class Flag(BaseModel):
+class FlagDefinition(BaseModel):
     key: str
     name: str
     description: str = ''
@@ -27,11 +27,11 @@ class Flag(BaseModel):
         return v
 
 
-def get(project_key: str, flag_key: str) -> Flag:
-    return Flag(key='karate',
-                name='Enable Japanese translations',
-                datatype='bool',
-                default_value=False)
+def get(project_key: str, flag_key: str) -> FlagDefinition:
+    return FlagDefinition(key='karate',
+                          name='Enable Japanese translations',
+                          datatype='bool',
+                          default_value=False)
 
 
 def get_value(project_key: str, environment_key: str, flag_key: str) -> FLAG_REVISIONED_VALUE_TYPE:

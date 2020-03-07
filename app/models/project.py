@@ -3,7 +3,7 @@ from typing import Dict
 from .base import DynamoBaseModel
 from ..config import AWS_DYNAMO_ENDPOINT, AWS_REGION
 from .environment import Environment
-from .flag import Flag
+from .flagdefinition import FlagDefinition
 
 
 class Project(DynamoBaseModel):
@@ -11,7 +11,7 @@ class Project(DynamoBaseModel):
     name: str
     description: str = ''
     environments: Dict[str, Environment]
-    flags: Dict[str, Flag]
+    flags: Dict[str, FlagDefinition]
 
     class Config(DynamoBaseModel.Config):
         title = 'Project'
@@ -24,7 +24,7 @@ class Project(DynamoBaseModel):
         }
 
 
-def upsert_flag(project_id: str, flag: Flag) -> Flag:
+def upsert_flag(project_id: str, flag: FlagDefinition) -> FlagDefinition:
     pass
 
 
