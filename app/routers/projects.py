@@ -16,7 +16,7 @@ async def get_project_details(project: str) -> Project:
 
 
 @router.put("/", tags=TAGS)
-async def change_project_definition(project: Project) -> Project:
+async def create_or_change_project_definition(project: Project) -> Project:
     try:
         upsert(project)
     except RevisionMismatch as e:
