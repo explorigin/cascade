@@ -28,20 +28,6 @@ def get(project_key: str) -> Project:
     return Project.get(project_key)
 
 
-def upsert_environment(project_key: str, env: Environment) -> Environment:
-    project = get(project_key)
-    project.environments[env.key] = env
-    project.save()
-    return env
-
-
-def upsert_flag(project_key: str, flag_def: FlagDefinition) -> FlagDefinition:
-    project = get(project_key)
-    project.flags[flag_def.key] = flag_def
-    project.save()
-    return flag_def
-
-
 def upsert(project: Project) -> Project:
     project.save()
     return project

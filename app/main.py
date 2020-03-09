@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .routers import flags, environments, projects
+from .routers import flags, projects
 
 app = FastAPI(
     title='Cascade',
@@ -8,7 +8,6 @@ app = FastAPI(
 )
 
 app.include_router(flags.router, prefix="/flags")
-app.include_router(environments.router, prefix="/environments")
 app.include_router(projects.router, prefix="/projects")
 
 
