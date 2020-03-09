@@ -1,18 +1,15 @@
-from typing import Literal
 from uuid import UUID, uuid4
 
 from pydantic import validator, BaseModel
 
-from ..cascade_types import FLAG_VALUE_TYPE, FLAG_REVISIONED_VALUE_TYPE
-
-SUPPORTED_DATATYPES = Literal['bool', 'str', 'int', 'float', 'datetime']
+from ..cascade_types import FLAG_VALUE_TYPE, FLAG_REVISIONED_VALUE_TYPE, FLAG_VALUE_TYPE_NAMES
 
 
 class FlagDefinition(BaseModel):
     key: str
     name: str
     description: str = ''
-    datatype: SUPPORTED_DATATYPES
+    datatype: FLAG_VALUE_TYPE_NAMES
     default_value: FLAG_VALUE_TYPE
 
     @validator('default_value')

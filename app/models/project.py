@@ -24,10 +24,6 @@ class Project(DynamoBaseModel):
         }
 
 
-def upsert_flag(project_id: str, flag: FlagDefinition) -> FlagDefinition:
-    pass
-
-
 def get(project_key: str) -> Project:
     return Project.get(project_key)
 
@@ -39,14 +35,13 @@ def upsert_environment(project_key: str, env: Environment) -> Environment:
     return env
 
 
-def get_flags(project_id: str, environment_id: str):
-    pass
+def upsert_flag(project_key: str, flag_def: FlagDefinition) -> FlagDefinition:
+    project = get(project_key)
+    project.flags[flag_def.key] = flag_def
+    project.save()
+    return flag_def
 
 
-def set_value():
-    pass
-
-
-def upsert(project: Project):
-    res = project.save()
-    return res
+def upsert(project: Project) -> Project:
+    project.save()
+    return project
