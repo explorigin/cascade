@@ -1,8 +1,6 @@
-from uuid import UUID, uuid4
-
 from pydantic import validator, BaseModel
 
-from ..cascade_types import FLAG_VALUE_TYPE, FLAG_REVISIONED_VALUE_TYPE, FLAG_VALUE_TYPE_NAMES
+from ..cascade_types import FLAG_VALUE_TYPE, FLAG_VALUE_TYPE_NAMES
 
 
 class FlagDefinition(BaseModel):

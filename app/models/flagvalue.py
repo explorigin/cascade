@@ -1,10 +1,12 @@
+from typing import Optional
+
 from uuid import UUID
 
 from pydantic import validator
 from .base import DynamoBaseModel
 from ..config import AWS_DYNAMO_ENDPOINT, AWS_REGION
 from ..cascade_types import FLAG_VALUE_TYPE, FLAG_VALUE_TYPE_NAMES
-from ..exceptions import DoesNotExist
+from ..exceptions import DoesNotExist, RevisionMismatch
 
 
 class FlagValue(DynamoBaseModel):
@@ -24,7 +26,7 @@ class FlagValue(DynamoBaseModel):
         return v
 
     class Config(DynamoBaseModel.Config):
-        title = 'Project'
+        title = 'FlagValue'
         hash_key = 'key'
         read = 1
         write = 1
@@ -34,11 +36,7 @@ class FlagValue(DynamoBaseModel):
         }
 
 
-def _build_key(project_key: str, environment_key: str, flag_definition_key: str) -> str:
-    return f'{project_key}_{environment_key}_{flag_definition_key}'
-
-
-def _build_instance_from_default(project_key: str, environment_key: str, flag_definition_key: str):
+def _validate_flag_definition(project_key: str, environment_key: str, flag_definition_key: str):
     from .project import get as get_project
 
     project = get_project(project_key)
@@ -46,6 +44,17 @@ def _build_instance_from_default(project_key: str, environment_key: str, flag_de
         raise DoesNotExist(f'Environment "{environment_key}" does not exist in project "{project_key}"')
     if flag_definition_key not in project.flags:
         raise DoesNotExist(f'Flag "{flag_definition_key}" does not exist in project "{project_key}"')
+
+    return project
+
+def _build_key(project_key: str, environment_key: str, flag_definition_key: str) -> str:
+    _validate_flag_definition(project_key, environment_key, flag_definition_key)
+
+    return f'{project_key}_{environment_key}_{flag_definition_key}'
+
+
+def _build_instance_from_default(project_key: str, environment_key: str, flag_definition_key: str):
+    project = _validate_flag_definition(project_key, environment_key, flag_definition_key)
 
     definition = project.flags[flag_definition_key]
     return FlagValue(
@@ -55,7 +64,10 @@ def _build_instance_from_default(project_key: str, environment_key: str, flag_de
     )
 
 
-def get(project_key: str, environment_key: str, flag_key: str, create_from_default_if_missing: bool = True) -> FlagValue:
+def get(project_key: str,
+        environment_key: str,
+        flag_key: str,
+        create_from_default_if_missing: bool = True) -> (bool, FlagValue):
     value_key = _build_key(project_key, environment_key, flag_key)
 
     try:
@@ -68,23 +80,30 @@ def get(project_key: str, environment_key: str, flag_key: str, create_from_defau
         return flag_value
 
 
-def set_value(project_key: str,
-              environment_key: str,
-              flag_definition_key: str,
-              value: FLAG_VALUE_TYPE,
-              revision: UUID = None) -> UUID:
-    try:
-        return FlagValue.update_value(
-            _build_key(project_key, environment_key, flag_definition_key),
+async def set_value(project_key: str,
+                    environment_key: str,
+                    flag_definition_key: str,
+                    value: FLAG_VALUE_TYPE,
+                    revision: Optional[UUID] = None) -> UUID:
+    value_key = _build_key(project_key, environment_key, flag_definition_key)
+    is_new = revision is None
+    new_revision = None
+    if is_new:
+        try:
+            FlagValue.get(value_key)
+        except DoesNotExist:
+            flag_value = _build_instance_from_default(project_key, environment_key, flag_definition_key)
+            flag_value.value = value
+            flag_value.save()
+            new_revision = flag_value.revision
+        else:
+            raise RevisionMismatch('Provided revision is out of date' if revision else 'Must provide a revision')
+    else:
+        new_revision = FlagValue.update_value(
+            value_key,
             'value',
             value,
             revision
         )
-    except DoesNotExist as e:
-        try:
-            flag_value = _build_instance_from_default(project_key, environment_key, flag_definition_key)
-            flag_value.value = value
-            flag_value.save()
-            return flag_value.revision
-        except DoesNotExist:
-            raise e
+
+    return is_new, new_revision

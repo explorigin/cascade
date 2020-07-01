@@ -1,18 +1,33 @@
-from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List, Any
 
-from pydantic import BaseModel
+from pydantic import HttpUrl
 
-WEBHOOK = 'webhook'
-POLL = 'poll'
-WEBSOCKET = 'websocket'
+from ..config import AWS_REGION, AWS_DYNAMO_ENDPOINT
+from ..cascade_types import FLAG_VALUE_TYPE
+from .base import DynamoBaseModel
 
 
-class Subscription(BaseModel):
-    type: str = WEBHOOK
-    project_key: str
-    environment_key: str
+class Subscription(DynamoBaseModel):
+    subscription_key: str
     flags: List[str]
-    revision_timestamp: datetime
-    poll_interval: Optional[timedelta]
-    next_expected_poll: Optional[datetime]
+    notification_key: HttpUrl
+
+    class Config(DynamoBaseModel.Config):
+        title = 'Subscription'
+        hash_key = 'subscription_key'
+        read = 1
+        write = 1
+        resource_kwargs = {
+            'region_name': AWS_REGION,
+            'endpoint_url': AWS_DYNAMO_ENDPOINT
+        }
+
+        @staticmethod
+        def schema_extra(schema):
+            # We remove the revision property from the schema because it is only used internally.
+            schema['properties'].pop('revision')
+
+
+def upsert(subscription: Subscription) -> Subscription:
+    subscription.save()
+    return subscription

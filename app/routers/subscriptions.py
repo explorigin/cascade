@@ -1,11 +1,11 @@
 from fastapi import APIRouter
 
-from ..models.subscription import Subscription
+from ..models.subscription import Subscription, upsert
 
 router = APIRouter()
 TAGS = ["Subscriptions"]
 
 
-@router.post("/{project}/{environment}", tags=TAGS)
-async def subscribe(project: str, environment: str) -> Subscription:
-    pass
+@router.post("/", tags=TAGS)
+async def subscribe(subscription: Subscription) -> Subscription:
+    return upsert(subscription)
