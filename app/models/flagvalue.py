@@ -3,13 +3,15 @@ from typing import Optional
 from uuid import UUID
 
 from pydantic import validator
-from .base import DynamoBaseModel
+from .base import VersionedBaseModel
+from .subscription import notify
+from .project import get as get_project
 from ..config import AWS_DYNAMO_ENDPOINT, AWS_REGION
 from ..cascade_types import FLAG_VALUE_TYPE, FLAG_VALUE_TYPE_NAMES
 from ..exceptions import DoesNotExist, RevisionMismatch
 
 
-class FlagValue(DynamoBaseModel):
+class FlagValue(VersionedBaseModel):
     key: str
     datatype: FLAG_VALUE_TYPE_NAMES
     value: FLAG_VALUE_TYPE
@@ -25,7 +27,7 @@ class FlagValue(DynamoBaseModel):
                 raise ValueError(f'Cannot convert "{v}" into {type_name}.')
         return v
 
-    class Config(DynamoBaseModel.Config):
+    class Config(VersionedBaseModel.Config):
         title = 'FlagValue'
         hash_key = 'key'
         read = 1
@@ -36,25 +38,14 @@ class FlagValue(DynamoBaseModel):
         }
 
 
-def _validate_flag_definition(project_key: str, environment_key: str, flag_definition_key: str):
-    from .project import get as get_project
-
-    project = get_project(project_key)
-    if environment_key not in project.environments:
-        raise DoesNotExist(f'Environment "{environment_key}" does not exist in project "{project_key}"')
-    if flag_definition_key not in project.flags:
-        raise DoesNotExist(f'Flag "{flag_definition_key}" does not exist in project "{project_key}"')
-
-    return project
-
 def _build_key(project_key: str, environment_key: str, flag_definition_key: str) -> str:
-    _validate_flag_definition(project_key, environment_key, flag_definition_key)
+    get_project(project_key, environment_key, flag_definition_key)
 
     return f'{project_key}_{environment_key}_{flag_definition_key}'
 
 
 def _build_instance_from_default(project_key: str, environment_key: str, flag_definition_key: str):
-    project = _validate_flag_definition(project_key, environment_key, flag_definition_key)
+    project = get_project(project_key, environment_key, flag_definition_key)
 
     definition = project.flags[flag_definition_key]
     return FlagValue(
@@ -105,5 +96,7 @@ async def set_value(project_key: str,
             value,
             revision
         )
+
+    await notify(project_key, environment_key, flag_definition_key, value)
 
     return is_new, new_revision

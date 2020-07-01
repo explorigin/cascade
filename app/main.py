@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .routers import flags, projects, subscriptions
+from .routers import flags, projects, subscriptions, interface
 
 app = FastAPI(
     title='Cascade',
@@ -10,8 +10,4 @@ app = FastAPI(
 app.include_router(flags.router, prefix="/flags")
 app.include_router(projects.router, prefix="/projects")
 app.include_router(subscriptions.router, prefix="/subscriptions")
-
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+app.include_router(interface.router)
