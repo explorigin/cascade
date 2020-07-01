@@ -26,11 +26,14 @@ html = """
                 if (!el.value) {
                     return;
                 }
+
+                ws = new WebSocket(`ws://localhost/subscriptions/${el.value}/ws`);
+                
+                el.value = '';
                 
                 document.getElementById("connectForm").remove();
                 document.querySelector('h1').innerText = `Monitoring ${el.value}`;
                 
-                ws = new WebSocket(`ws://localhost/subscriptions/${el.value}/ws`);
                 ws.onmessage = function(event) {
                     var messages = document.getElementById('messages')
                     var message = document.createElement('li')
@@ -38,7 +41,7 @@ html = """
                     message.appendChild(content)
                     messages.appendChild(message)
                 };
-                el.value = '';
+                
             }
         </script>
     </body>

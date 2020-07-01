@@ -2,12 +2,12 @@ from typing import List
 
 from uuid import uuid4
 
+from fastapi.encoders import jsonable_encoder
 from starlette.websockets import WebSocket, WebSocketDisconnect
 from boto3.dynamodb.conditions import Attr
 
 from ..config import AWS_REGION, AWS_DYNAMO_ENDPOINT
 from .base import UnversionedBaseModel
-from ..cascade_types import FLAG_VALUE_TYPE
 from ..models.project import get as get_project
 
 
@@ -47,7 +47,7 @@ class Notifier:
         self.connections.append(websocket)
         try:
             while True:
-                heartbeat = await websocket.receive_json()
+                await websocket.receive_json()
                 await websocket.send_json({})
         except WebSocketDisconnect:
             self.remove(websocket)
@@ -95,7 +95,7 @@ def upsert(project: str,
     return subscription
 
 
-async def notify(project_key: str, environment_key: str, flag_key: str, value: FLAG_VALUE_TYPE):
+async def notify(project_key: str, environment_key: str, flag_key: str, value):
     notifiers = {
         _notifier_map.get(subscription.key)
         for subscription in Subscription.query(
@@ -110,6 +110,6 @@ async def notify(project_key: str, environment_key: str, flag_key: str, value: F
             "project": project_key,
             "environment": environment_key,
             "flags": {
-                flag_key: value
+                flag_key: jsonable_encoder(value, exclude={'key', 'datatype'})
             }
         })

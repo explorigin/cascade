@@ -96,7 +96,10 @@ async def set_value(project_key: str,
             value,
             revision
         )
+        flag_value = FlagValue.get(value_key)
 
-    await notify(project_key, environment_key, flag_definition_key, value)
+    if new_revision != revision:
+        # Something was actually changed, so send a notification.
+        await notify(project_key, environment_key, flag_definition_key, flag_value)
 
     return is_new, new_revision
