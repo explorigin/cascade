@@ -3,7 +3,7 @@ services:
   dynamo:
     image: dwmkerr/dynamodb
     ports:
-      - "8000:8000"
+      - "9000:8000"
     networks:
       cascade:
         aliases:
@@ -33,7 +33,7 @@ services:
     links:
       - dynamo
     ports:
-      - "80:80"
+      - "8000:80"
     environment:
       AWS_ACCESS_KEY_ID: "default"
       AWS_SECRET_ACCESS_KEY: "default"

@@ -11,7 +11,7 @@ router = APIRouter()
 TAGS = ["Subscriptions"]
 
 
-@router.post("/{project}/{environment}/{subscription_name}", tags=TAGS)
+@router.post("/{project}/{environment}", tags=TAGS)
 async def subscribe(project: str, environment: str, flags: List[str]):
     try:
         subscription = upsert(project, environment, flags)

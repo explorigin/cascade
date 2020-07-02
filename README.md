@@ -18,8 +18,16 @@ A project can have any number of environments assigned to it. The purpose of an 
 
 A flag is one datum that can be relevant across projects or servers. In the above API version situation a flag could be as simple as a boolean (`use_new_api`) or something more complicated (`authentication_api_url`).  
 
+
+## Running the service
+
+1. `docker-compose up -d`
+2. `yarn start`
+
+NOTE: The `bootstrap` service merely creates dynamo tables if they don't exist and then exits. It is normal for it to not stay running.
+
+Running this will give you a demo app running at [http://localhost](http://localhost)
+
 ## Development
 
 See the [development](./docs/development.md) documentation for details on setting up a development environment.
-
-Cascade includes a web-based API host at [http://localhost/docs](//localhost/docs). That can be used to easily interact with the API.

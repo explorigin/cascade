@@ -1,0 +1,14 @@
+{
+  "name": "cascade",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "ssh://git@gitea.thecookiejar.me:2222/explorigin/cascade.git",
+  "author": "Timothy Farrell <tim@thecookiejar.me>",
+  "scripts": {
+    "start": "es-dev-server --root-dir frontend --open --node-resolve --watch"
+  },
+  "devDependencies": {
+    "es-dev-server": "^1.56.0",
+    "koa-proxies": "^0.11.0"
+  }
+}
