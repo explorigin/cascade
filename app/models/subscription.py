@@ -95,7 +95,7 @@ def upsert(project: str,
     return subscription
 
 
-async def notify(project_key: str, environment_key: str, flag_key: str, value):
+async def notify(project_key: str, environment_key: str, flag_key: str, flag):
     notifiers = {
         _notifier_map.get(subscription.key)
         for subscription in Subscription.query(
@@ -109,7 +109,7 @@ async def notify(project_key: str, environment_key: str, flag_key: str, value):
         await n.notify({
             "project": project_key,
             "environment": environment_key,
-            "flags": {
-                flag_key: jsonable_encoder(value, exclude={'key', 'datatype'})
+            "data": {
+                flag_key: jsonable_encoder(flag, exclude={'key', 'datatype', 'revision'})
             }
         })

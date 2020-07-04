@@ -11,13 +11,13 @@ router = APIRouter()
 TAGS = ["Subscriptions"]
 
 
-@router.post("/{project}/{environment}", tags=TAGS)
+@router.post("/{project}/{environment}", tags=TAGS, status_code=201)
 async def subscribe(project: str, environment: str, flags: List[str]):
     try:
         subscription = upsert(project, environment, flags)
         data = subscription.dict()
         data['data'] = {
-            flag_key: get(project, environment, flag_key).dict(exclude={'key'})
+            flag_key: get(project, environment, flag_key).dict(exclude={'key', 'revision'})
             for flag_key in subscription.flags
         }
         return data

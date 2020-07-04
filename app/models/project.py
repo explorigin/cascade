@@ -26,8 +26,8 @@ class Project(VersionedBaseModel):
 
 
 def get(project_key: str,
-        environment_key: Optional[str],
-        flag_definition_key_or_list: Optional[Union[str, List[str]]]) -> Project:
+        environment_key: Optional[str] = None,
+        flag_definition_key_or_list: Optional[Union[str, List[str]]] = None) -> Project:
     project = Project.get(project_key)
 
     if environment_key is not None and environment_key not in project.environments:
