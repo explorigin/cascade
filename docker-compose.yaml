@@ -3,7 +3,7 @@ services:
   dynamo:
     image: dwmkerr/dynamodb
     ports:
-      - "9000:8000"
+      - "8002:8000"
     networks:
       cascade:
         aliases:
@@ -17,7 +17,7 @@ services:
     environment:
       AWS_ACCESS_KEY_ID: "default"
       AWS_SECRET_ACCESS_KEY: "default"
-      AWS_DYNAMO_ENDPOINT: "http://cascade-dynamo:8000"
+      AWS_DYNAMO_ENDPOINT: "http://cascade-dynamo:8002"
     volumes:
       - ./:/application
     command: ['python', '-c', 'from debug import bootstrap_tables; bootstrap_tables()']
@@ -33,14 +33,14 @@ services:
     links:
       - dynamo
     ports:
-      - "8000:80"
+      - "8001:8001"
     environment:
       AWS_ACCESS_KEY_ID: "default"
       AWS_SECRET_ACCESS_KEY: "default"
-      AWS_DYNAMO_ENDPOINT: "http://cascade-dynamo:8000"
+      AWS_DYNAMO_ENDPOINT: "http://cascade-dynamo:8002"
     volumes:
       - ./:/application
-    command: 'uvicorn app.main:app --host 0.0.0.0 --port 80 --reload'
+    command: 'uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload'
     networks:
       cascade:
         aliases:

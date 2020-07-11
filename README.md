@@ -27,7 +27,7 @@ A flag is one datum that can be relevant across projects or servers. In the abov
 
 NOTE: The `bootstrap` service merely creates dynamo tables if they don't exist and then exits. It is normal for it to not stay running.
 
-Running this will give you a demo app running at [http://localhost](http://localhost)
+Running this will give you a demo app running at [http://localhost:8000](http://localhost:8000)
 
 ## Development
 

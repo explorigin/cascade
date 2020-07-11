@@ -5,7 +5,7 @@
   "repository": "ssh://git@gitea.thecookiejar.me:2222/explorigin/cascade.git",
   "author": "Timothy Farrell <tim@thecookiejar.me>",
   "scripts": {
-    "start": "es-dev-server --app-index index.html --open --node-resolve --watch"
+    "start": "es-dev-server --port 8000 --app-index index.html --open --node-resolve --watch"
   },
   "devDependencies": {
     "es-dev-server": "^1.56.0",
