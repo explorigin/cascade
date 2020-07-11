@@ -6,8 +6,6 @@ import { DemoApp } from './DemoApp';
 window.config = CascadeConfig(
   `${window.location.hostname}:8001`,
   {
-    debug: true,
-    idp_mgmt_username: '',
     log_to_console: false
   }
 );
