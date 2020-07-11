@@ -9,34 +9,20 @@ export function CascadeConfig(baseUrl, unmanagedValues) {
       if (disallowedFlags.length) {
         throw Error(`Can't subscribe to ${project}:${environment}. Flag(s) ${disallowedFlags.join(', ')} are already subscribed.`);
       }
-      const res = await fetch(
-        `//${baseUrl}/subscriptions/${project}/${environment}`,
-        {
-          method: 'POST',
-          body: JSON.stringify(flags)
-        }
-      );
-      if (res.status !== 201) {
-        throw Error(`Failed to subscribe: ${await res.text()}`);
-      }
-      // TODO - if the network call fails, use the defaults, but check localstorage
-      const {key, data} = await res.json();
-      for (let flagName of Object.keys(data)) {
-        // TODO - validate datatype
-        _data[flagName] = data[flagName].value;
-      }
-      // TODO - cache the network values to localstorage
 
-      _ws[key] = new WebSocket(`ws://${baseUrl}/subscriptions/${key}/ws`);
-      _ws[key].onerror = (event) => {
+      const websocket = new WebSocket(`ws://${baseUrl}/subscriptions/ws`);
+      websocket.onerror = (event) => {
         // TODO - When a connection cannot be established, maybe try using a GET request at intervals.
+        console.log('onerror', event);
       };
-      _ws[key].onclose = (event) => {
+      websocket.onclose = (event) => {
         // TODO - When a connection is closed, try to reconnect in incremental back-off mode.
+        console.log('onclose', event);
       };
-      _ws[key].onmessage = (event) => {
+      websocket.onmessage = (event) => {
+        console.log('onmessage', event);
         const changeset = JSON.parse(event.data);
-        const {project, environment, data} = changeset;
+        const { data } = changeset;
         for (let flagName of Object.keys(data)) {
           // TODO - validate datatype
           _data[flagName] = data[flagName].value;
@@ -44,7 +30,11 @@ export function CascadeConfig(baseUrl, unmanagedValues) {
         // TODO - cache the network values to localstorage
         window.dispatchEvent(new CustomEvent('cascade:updated', {detail: changeset}));
       };
-      window.dispatchEvent(new CustomEvent('cascade:connected', {detail: data}));
+      websocket.onopen = (event) => {
+        console.log('onopen', event);
+        event.target.send(JSON.stringify({ project, environment, flags }));
+//        window.dispatchEvent(new CustomEvent('cascade:connected', {detail: data}));
+      };
     }
   };
 

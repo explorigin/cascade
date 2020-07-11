@@ -8,6 +8,7 @@ from boto3.dynamodb.conditions import Attr
 
 from ..config import AWS_REGION, AWS_DYNAMO_ENDPOINT
 from .base import UnversionedBaseModel
+from ..exceptions import DoesNotExist
 from ..models.project import get as get_project
 
 
@@ -29,8 +30,8 @@ class Subscription(UnversionedBaseModel):
 
 
 class Notifier:
-    def __init__(self, subscription_key: str):
-        self.subscription_key = subscription_key
+    def __init__(self):
+        self.subscription = None
         self.connections: List[WebSocket] = []
         self.generator = self.get_notification_generator()
 
@@ -47,14 +48,36 @@ class Notifier:
         self.connections.append(websocket)
         try:
             while True:
-                await websocket.receive_json()
-                await websocket.send_json({})
+                data = await websocket.receive_json()
+                if self.subscription is None:
+                    try:
+                        self.subscription = upsert(**data)
+                    except DoesNotExist:
+                        await self.remove(websocket, 4004)
+                        return
+                    _notifier_map[self.subscription.key] = self
+                    _unknown_list.remove(self)
+                    await websocket.send_json({
+                        "project": self.subscription.project_key,
+                        "environment": self.subscription.environment_key,
+                        "data": await get_flag_data(self.subscription)
+                    })
+                else:
+                    await self.remove(websocket, 4009)
         except WebSocketDisconnect:
-            self.remove(websocket)
+            await self.remove(websocket)
 
-    def remove(self, websocket: WebSocket):
+    async def remove(self, websocket: WebSocket, code=1000):
+        await websocket.close(code)
         self.connections.remove(websocket)
-        del _notifier_map[self.subscription_key]
+        try:
+            _unknown_list.remove(self)
+        except ValueError:
+            pass
+        try:
+            del _notifier_map[self.subscription.key]
+        except (KeyError, AttributeError):
+            pass
 
     async def notify(self, data):
         living_connections = []
@@ -68,14 +91,13 @@ class Notifier:
 
 
 _notifier_map = {}
+_unknown_list = []
 
 
-def get_notifier(subscription_key: str):
-    Subscription.get(subscription_key)  # Eventually this will check permissions
-
-    if subscription_key not in _notifier_map:
-        _notifier_map[subscription_key] = Notifier(subscription_key)
-    return _notifier_map[subscription_key]
+def get_notifier():
+    notifier = Notifier()
+    _unknown_list.append(notifier)
+    return notifier
 
 
 def upsert(project: str,
@@ -93,6 +115,15 @@ def upsert(project: str,
 
     subscription.save()
     return subscription
+
+
+async def get_flag_data(sub: Subscription):
+    from ..models.flagvalue import get as get_flag_value
+
+    return {
+        flag_key: get_flag_value(sub.project_key, sub.environment_key, flag_key).dict(exclude={'key', 'revision'})
+        for flag_key in sub.flags
+    }
 
 
 async def notify(project_key: str, environment_key: str, flag_key: str, flag):

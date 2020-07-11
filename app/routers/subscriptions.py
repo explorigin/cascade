@@ -25,11 +25,6 @@ async def subscribe(project: str, environment: str, flags: List[str]):
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.websocket("/{subscription_key}/ws")
-async def websocket_endpoint(subscription_key: str, websocket: WebSocket):
-    try:
-        notifier = get_notifier(subscription_key)
-    except DoesNotExist:
-        await websocket.close(code=404)
-    else:
-        await notifier.connect(websocket)
+@router.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await get_notifier().connect(websocket)
