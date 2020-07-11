@@ -22,7 +22,8 @@ A flag is one datum that can be relevant across projects or servers. In the abov
 ## Running the service
 
 1. `docker-compose up -d`
-2. `yarn start`
+2. `yarn install`
+3. `yarn start`
 
 NOTE: The `bootstrap` service merely creates dynamo tables if they don't exist and then exits. It is normal for it to not stay running.
 
