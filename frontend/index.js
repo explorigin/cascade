@@ -4,7 +4,7 @@ import { DisplayConfig } from './components/DisplayConfig';
 import { DemoApp } from './DemoApp';
 
 window.config = CascadeConfig(
-  `${window.location.host}:8000`,
+  `${window.location.hostname}:8001`,
   {
     debug: true,
     idp_mgmt_username: '',

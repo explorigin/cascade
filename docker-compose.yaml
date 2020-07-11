@@ -3,7 +3,8 @@ services:
   dynamo:
     image: dwmkerr/dynamodb
     ports:
-      - "8002:8000"
+      - "8002:8002"
+    command: [' -jar', 'DynamoDBLocal.jar', '-port', '8002']
     networks:
       cascade:
         aliases:
