@@ -6,7 +6,9 @@ import { DemoApp } from './DemoApp';
 window.config = CascadeConfig(
   `${window.location.hostname}:8001`,
   {
-    log_to_console: false
+    debug: 'dued',
+    astra_endpoint: 'http://example.com',
+    idp_mgmt_username: 'bob'
   }
 );
 
