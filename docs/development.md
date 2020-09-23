@@ -4,7 +4,7 @@ If you want to debug in PyCharm:
 
 1. Run the steps [Running the Service](./README.md#Running_the_service) steps.
 2. `docker-compose stop cascade`
-3. Start your `Debug` job in Python.
+3. Start your `Debug` job in PyCharm.
 
 ## PyCharm Setup
 

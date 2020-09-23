@@ -2,7 +2,7 @@
 
 Cascade is a centralized feature flag manager to coordinate truth across multiple distinct projects.
 
-Cascade clients will connect and subscribe to a preset collection of flags. If the flag is updated, cascade will propagate the change to all subscribed clients, tracing when a client has recognized the new flag. This way, new features can be switched on and off in less than a second across any number of products.
+Cascade clients will connect and subscribe to a preset collection of flags. If the flag is updated, cascade will propagate the change to all subscribed clients, tracing when a client has recognized the new flag. This way, new features can be switched on and off in seconds across any number of products.
 
 ## Concepts
 
