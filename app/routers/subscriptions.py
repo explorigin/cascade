@@ -5,7 +5,7 @@ from starlette.websockets import WebSocket
 
 from ..exceptions import DoesNotExist
 from ..models.subscription import upsert, get_notifier
-from ..models.flagvalue import get
+from ..models.state import get
 
 router = APIRouter()
 TAGS = ["Subscriptions"]

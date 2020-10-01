@@ -7,8 +7,6 @@ window.config = CascadeConfig(
   `${window.location.hostname}:8001`,
   {
     debug: 'dued',
-    astra_endpoint: 'http://example.com',
-    idp_mgmt_username: 'bob'
   }
 );
 

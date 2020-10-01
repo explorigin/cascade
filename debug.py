@@ -1,10 +1,10 @@
 import uvicorn
 
-from app.models import project, flagvalue, subscription
+from app.models import project, state, subscription
 
 
 def bootstrap_tables():
-    for model in (project.Project, flagvalue.FlagValue, subscription.Subscription):
+    for model in (project.Project, state.State, subscription.Subscription):
         if model.exists():
             print(f"Table '{model.get_table_name()}' exists.")
         else:
@@ -14,4 +14,4 @@ def bootstrap_tables():
 
 if __name__ == "__main__":
     bootstrap_tables()
-    uvicorn.run('app.main:app', host="0.0.0.0", port=80, reload=True)
+    uvicorn.run('app.main:app', host="0.0.0.0", port=8001, reload=True)

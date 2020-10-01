@@ -74,7 +74,7 @@ export function CascadeConfig(baseUrl, defaultValues = {}) {
         const { datatype, value } = data[flagName];
         if (datatype && !_types[flagName]) {
           _types[flagName] = getConverter(datatype);
-          // Validate the
+          // Validate the default value just so the developer knows they have an invalid default.
           _types[flagName](_defaults[flagName])
           // console.error(`Default value for "${flagName}" does not match authoritative value ${datatype}`);
         }

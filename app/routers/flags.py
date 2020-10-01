@@ -2,11 +2,13 @@ from typing import Optional
 
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Response, status
+from fastapi import APIRouter, HTTPException, Response
+from fastapi.exceptions import RequestValidationError
+from pydantic import ValidationError
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
 from ..cascade_types import FLAG_VALUE_TYPE, FLAG_REVISIONED_VALUE_TYPE
-from ..models.flagvalue import get, set_value
+from ..models.state import get, set_value
 from ..exceptions import DoesNotExist, RevisionMismatch
 
 router = APIRouter()
@@ -20,8 +22,9 @@ async def get_flag_value(project: str,
     """Get the latest value for the given flag in the given environment and project."""
 
     try:
-        return get(project, environment, flag).dict(exclude={'datatype', 'key'})
-    except DoesNotExist as e:
+        state = get(project, environment)
+        return dict(revision=state.revision, value=state.data[flag])
+    except (DoesNotExist, KeyError) as e:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=str(e))
 
 
@@ -43,5 +46,7 @@ async def set_flag_value(response: Response,
         return new_revision
     except DoesNotExist as e:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=str(e))
+    except ValidationError as e:
+        raise RequestValidationError(e.raw_errors)
     except RevisionMismatch as e:
         raise HTTPException(status_code=HTTP_409_CONFLICT, detail=str(e))

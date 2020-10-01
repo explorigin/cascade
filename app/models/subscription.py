@@ -10,6 +10,7 @@ from ..config import AWS_REGION, AWS_DYNAMO_ENDPOINT
 from .base import UnversionedBaseModel
 from ..exceptions import DoesNotExist
 from ..models.project import get as get_project
+from ..cascade_types import FLAG_VALUE_TYPE
 
 
 class Subscription(UnversionedBaseModel):
@@ -118,15 +119,16 @@ def upsert(project: str,
 
 
 async def get_flag_data(sub: Subscription):
-    from ..models.flagvalue import get as get_flag_value
+    from ..models.state import get as get_state
 
+    state = get_state(sub.project_key, sub.environment_key)
     return {
-        flag_key: get_flag_value(sub.project_key, sub.environment_key, flag_key).dict(exclude={'key', 'revision'})
+        flag_key: dict(value=state.data[flag_key], datatype=state.types[flag_key])
         for flag_key in sub.flags
     }
 
 
-async def notify(project_key: str, environment_key: str, flag_key: str, flag):
+async def notify(project_key: str, environment_key: str, flag_key: str, value: FLAG_VALUE_TYPE):
     notifiers = {
         _notifier_map.get(subscription.key)
         for subscription in Subscription.query(
@@ -141,6 +143,6 @@ async def notify(project_key: str, environment_key: str, flag_key: str, flag):
             "project": project_key,
             "environment": environment_key,
             "data": {
-                flag_key: jsonable_encoder(flag, exclude={'key', 'datatype', 'revision'})
+                flag_key: jsonable_encoder({"value": value})
             }
         })
