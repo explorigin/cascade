@@ -16,14 +16,24 @@ TAGS = ["Flag"]
 
 
 @router.get("/{project}/{environment}/{flag}", tags=TAGS)
-async def get_flag_value(project: str,
-                         environment: str,
-                         flag: str) -> FLAG_REVISIONED_VALUE_TYPE:
+async def get_flag_value(project: str, environment: str, flag: str):
     """Get the latest value for the given flag in the given environment and project."""
 
     try:
         state = get(project, environment)
         return dict(revision=state.revision, value=state.data[flag])
+    except (DoesNotExist, KeyError) as e:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=str(e))
+
+
+
+@router.get("/{project}/{environment}", tags=TAGS)
+async def get_state(project: str, environment: str):
+    """Get the latest state for the given environment and project."""
+
+    try:
+        state = get(project, environment)
+        return state.dict(exclude={'key'})
     except (DoesNotExist, KeyError) as e:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=str(e))
 
