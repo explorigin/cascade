@@ -7,7 +7,6 @@ from pydantic import validator
 from .base import VersionedBaseModel
 from .subscription import notify
 from .project import get as get_project
-from ..config import AWS_DYNAMO_ENDPOINT, AWS_REGION
 from ..cascade_types import FLAG_VALUE_TYPE, FLAG_VALUE_TYPE_NAMES, convert
 from ..exceptions import DoesNotExist, RevisionMismatch
 
@@ -33,12 +32,6 @@ class State(VersionedBaseModel):
     class Config(VersionedBaseModel.Config):
         title = 'State'
         hash_key = 'key'
-        read = 1
-        write = 1
-        resource_kwargs = {
-            'region_name': AWS_REGION,
-            'endpoint_url': AWS_DYNAMO_ENDPOINT
-        }
 
 
 def _build_key(project_key: str, environment_key: str) -> str:
@@ -93,6 +86,11 @@ async def set_value(project_key: str,
         state = State.get(state_key)
         if state.revision != revision:
             raise RevisionMismatch('Provided revision is out of date')
+
+        if state.data[flag_key] == value:
+            # If the data is the same, short-circuit without having to hit the backend
+            return is_new, state.revision
+
         state.data[flag_key] = value
         state.save()
         new_revision = state.revision

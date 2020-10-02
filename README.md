@@ -8,7 +8,7 @@ Cascade clients will connect and subscribe to a preset collection of flags. If t
 
 ### Projects
 
-A project is a feature effort that can span multiple projects. A good example of a project would be migrating between API versions for internal services.
+A project is a feature effort that can span multiple products. A good example of a project would be migrating between API versions for internal services.
 
 ### Environments
 
@@ -16,7 +16,7 @@ A project can have any number of environments assigned to it. The purpose of an 
 
 ### Flags
 
-A flag is one datum that can be relevant across projects or servers. In the above API version situation a flag could be as simple as a boolean (`use_new_api`) or something more complicated (`authentication_api_url`).  
+A flag is one datum that can be relevant across products or just one product that you want fine-control over. In the above API version situation a flag could be as simple as a boolean (`use_new_api`) or something more complicated (`authentication_api_url`).  
 
 
 ## Running the service
@@ -25,10 +25,32 @@ A flag is one datum that can be relevant across projects or servers. In the abov
 2. `yarn install`
 3. `yarn start`
 
-NOTE: The `bootstrap` service merely creates dynamo tables if they don't exist and then exits. It is normal for it to not stay running.
+NOTE: The `bootstrap` service merely initializes the database and then exits. It is normal for it to not stay running.
 
-Running this will give you a demo app running at [http://localhost:8000](http://localhost:8000)
+Running this will give you an example app running at [http://localhost:8000](http://localhost:8000)
 
+## Configuration
+
+Cascade can be configured with a few environment variables:
+
+- `cascade_backend` - Sets the Python path for the selected backend. Each backend has it's own set of environment variables for further configuration.
+- `cascade_initialize` - Boolean - Should the tables be created
+
+### Backends
+
+#### DynamoDB
+
+Set `cascade_backend` to `app.backends.dynamodb.Backend`
+
+##### Environment Variables
+
+ - `AWS_ACCESS_KEY_ID` - AWS API Key
+ - `AWS_SECRET_ACCESS_KEY` - AWS API Secret
+ - `DYNAMO_REGION` - AWS Region for dynamo tables
+ - `DYNAMO_ENDPOINT` - Endpoint for dynamo server
+ - `DYNAMO_DEFAULT_READ` - Default read units for tables
+ - `DYNAMO_DEFAULT_WRITE` - Default write units for tables
+ 
 ## Development
 
 See the [development](./docs/development.md) documentation for details on setting up a development environment.

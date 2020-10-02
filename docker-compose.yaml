@@ -18,7 +18,9 @@ services:
     environment:
       AWS_ACCESS_KEY_ID: "default"
       AWS_SECRET_ACCESS_KEY: "default"
-      AWS_DYNAMO_ENDPOINT: "http://cascade-dynamo:8002"
+      DYNAMO_ENDPOINT: "http://cascade-dynamo:8002"
+      cascade_backend: "app.backends.dynamodb.Backend"
+      cascade_initialize: "true"
     volumes:
       - ./:/application
     command: ['python', '-c', 'from debug import bootstrap_tables; bootstrap_tables()']
@@ -39,7 +41,8 @@ services:
     environment:
       AWS_ACCESS_KEY_ID: "default"
       AWS_SECRET_ACCESS_KEY: "default"
-      AWS_DYNAMO_ENDPOINT: "http://cascade-dynamo:8002"
+      DYNAMO_ENDPOINT: "http://cascade-dynamo:8002"
+      cascade_backend: "app.backends.dynamodb.Backend"
     volumes:
       - ./:/application
     command: 'uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload'

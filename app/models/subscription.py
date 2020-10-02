@@ -3,10 +3,9 @@ from typing import List
 from uuid import uuid4
 
 from fastapi.encoders import jsonable_encoder
+from rule_engine import Rule
 from starlette.websockets import WebSocket, WebSocketDisconnect
-from boto3.dynamodb.conditions import Attr
 
-from ..config import AWS_REGION, AWS_DYNAMO_ENDPOINT
 from .base import UnversionedBaseModel
 from ..exceptions import DoesNotExist
 from ..models.project import get as get_project
@@ -22,12 +21,6 @@ class Subscription(UnversionedBaseModel):
     class Config(UnversionedBaseModel.Config):
         title = 'Subscription'
         hash_key = 'key'
-        read = 1
-        write = 1
-        resource_kwargs = {
-            'region_name': AWS_REGION,
-            'endpoint_url': AWS_DYNAMO_ENDPOINT
-        }
 
 
 class Notifier:
@@ -129,15 +122,19 @@ async def get_flag_data(sub: Subscription):
 
 
 async def notify(project_key: str, environment_key: str, flag_key: str, value: FLAG_VALUE_TYPE):
+    subscriptions = Subscription.query(
+        Rule(f"project_key == '{project_key}' and environment_key == '{environment_key}' and '{flag_key}' in flags")
+        # Attr('project_key').eq(project_key)
+        # and Attr('environment_key').eq(environment_key)
+        # and Attr('flags').contains(flag_key)
+    )
     notifiers = {
         _notifier_map.get(subscription.key)
-        for subscription in Subscription.query(
-            Attr('project_key').eq(project_key)
-            and Attr('environment_key').eq(environment_key)
-            and Attr('flags').contains(flag_key)
-        )
+        for subscription in subscriptions
         if subscription.key in _notifier_map  # only if it exists
     }
+
+    # Notify known subscriptions
     for n in notifiers:
         await n.notify({
             "project": project_key,
@@ -146,3 +143,8 @@ async def notify(project_key: str, environment_key: str, flag_key: str, value: F
                 flag_key: jsonable_encoder({"value": value})
             }
         })
+
+    # Clean up stale subscriptions
+    for subscription in subscriptions:
+        if subscription.key not in _notifier_map:
+            Subscription.delete(subscription.key)

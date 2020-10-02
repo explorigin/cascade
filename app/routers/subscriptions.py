@@ -4,8 +4,7 @@ from fastapi import APIRouter, HTTPException
 from starlette.websockets import WebSocket
 
 from ..exceptions import DoesNotExist
-from ..models.subscription import upsert, get_notifier
-from ..models.state import get
+from ..models.subscription import upsert, get_notifier, get_flag_data
 
 router = APIRouter()
 TAGS = ["Subscriptions"]
@@ -16,10 +15,7 @@ async def subscribe(project: str, environment: str, flags: List[str]):
     try:
         subscription = upsert(project, environment, flags)
         data = subscription.dict()
-        data['data'] = {
-            flag_key: get(project, environment, flag_key).dict(exclude={'key', 'revision'})
-            for flag_key in subscription.flags
-        }
+        data['data'] = get_flag_data(subscription)
         return data
     except DoesNotExist as e:
         raise HTTPException(status_code=404, detail=str(e))

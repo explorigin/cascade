@@ -1,7 +1,6 @@
 from typing import Dict, Optional, Union, List
 
 from .base import VersionedBaseModel
-from ..config import AWS_DYNAMO_ENDPOINT, AWS_REGION
 from .environment import Environment
 from .flagdefinition import FlagDefinition
 from ..exceptions import DoesNotExist
@@ -17,12 +16,6 @@ class Project(VersionedBaseModel):
     class Config(VersionedBaseModel.Config):
         title = 'Project'
         hash_key = 'key'
-        read = 1
-        write = 1
-        resource_kwargs = {
-            'region_name': AWS_REGION,
-            'endpoint_url': AWS_DYNAMO_ENDPOINT
-        }
 
 
 def get(project_key: str,

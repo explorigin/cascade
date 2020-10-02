@@ -40,7 +40,7 @@ async def set_flag_value(response: Response,
     try:
         is_new, new_revision = await set_value(project, environment, flag, value, revision)
         if is_new:
-            response.status_code = 201  # Value did not previously exist, created from default
+            response.status_code = 201  # Value did not previously exist, created
         elif new_revision == revision:
             response.status_code = 204  # Value not changed
         return new_revision
