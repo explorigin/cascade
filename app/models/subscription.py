@@ -124,9 +124,6 @@ async def get_flag_data(sub: Subscription):
 async def notify(project_key: str, environment_key: str, flag_key: str, value: FLAG_VALUE_TYPE):
     subscriptions = Subscription.query(
         Rule(f"project_key == '{project_key}' and environment_key == '{environment_key}' and '{flag_key}' in flags")
-        # Attr('project_key').eq(project_key)
-        # and Attr('environment_key').eq(environment_key)
-        # and Attr('flags').contains(flag_key)
     )
     notifiers = {
         _notifier_map.get(subscription.key)
