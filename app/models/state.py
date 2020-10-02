@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 from uuid import UUID
 
@@ -100,3 +100,12 @@ async def set_value(project_key: str,
         await notify(project_key, environment_key, flag_key, value)
 
     return is_new, new_revision
+
+
+def get_flag_data(project_key: str, environment_key: str, flag_names: Optional[List[str]] = None):
+    state = get(project_key, environment_key)
+    flags = flag_names if flag_names is not None else state.types.keys()
+    return {
+        flag_name: dict(value=state.data[flag_name], datatype=state.types[flag_name])
+        for flag_name in flags
+    }

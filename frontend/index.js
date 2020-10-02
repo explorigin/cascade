@@ -6,7 +6,7 @@ import { DemoApp } from './DemoApp';
 window.config = CascadeConfig(
   `${window.location.hostname}:8001`,
   {
-    debug: 'dued',
+    debug: 'invalid value',
   }
 );
 

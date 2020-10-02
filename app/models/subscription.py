@@ -7,14 +7,15 @@ from rule_engine import Rule
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
 from .base import UnversionedBaseModel
+from .state import get_flag_data
 from ..exceptions import DoesNotExist
 from ..models.project import get as get_project
 from ..cascade_types import FLAG_VALUE_TYPE
 
 
 class Subscription(UnversionedBaseModel):
-    project_key: str
-    environment_key: str
+    project: str
+    environment: str
     flags: List[str]
     key: str
 
@@ -22,6 +23,13 @@ class Subscription(UnversionedBaseModel):
         title = 'Subscription'
         hash_key = 'key'
 
+    def get_data(self):
+        data = self.dict(exclude={'key', 'flags'})
+        data['data'] = get_flag_data(
+            self.subscription.project,
+            self.subscription.environment,
+            self.subscription.flags
+        )
 
 class Notifier:
     def __init__(self):
@@ -51,11 +59,7 @@ class Notifier:
                         return
                     _notifier_map[self.subscription.key] = self
                     _unknown_list.remove(self)
-                    await websocket.send_json({
-                        "project": self.subscription.project_key,
-                        "environment": self.subscription.environment_key,
-                        "data": await get_flag_data(self.subscription)
-                    })
+                    await websocket.send_json(self.subscription.get_data())
                 else:
                     await self.remove(websocket, 4009)
         except WebSocketDisconnect:
@@ -98,11 +102,12 @@ def upsert(project: str,
            environment: str,
            flags: List[str]) -> Subscription:
 
+    # We don't technically need it, we're just making sure the subscription is valid.
     get_project(project, environment, flags)
 
     subscription = Subscription(
-        project_key=project,
-        environment_key=environment,
+        project=project,
+        environment=environment,
         flags=flags,
         key=str(uuid4()),
     )
@@ -111,19 +116,9 @@ def upsert(project: str,
     return subscription
 
 
-async def get_flag_data(sub: Subscription):
-    from ..models.state import get as get_state
-
-    state = get_state(sub.project_key, sub.environment_key)
-    return {
-        flag_key: dict(value=state.data[flag_key], datatype=state.types[flag_key])
-        for flag_key in sub.flags
-    }
-
-
 async def notify(project_key: str, environment_key: str, flag_key: str, value: FLAG_VALUE_TYPE):
     subscriptions = Subscription.query(
-        Rule(f"project_key == '{project_key}' and environment_key == '{environment_key}' and '{flag_key}' in flags")
+        Rule(f"project == '{project_key}' and environment == '{environment_key}' and '{flag_key}' in flags")
     )
     notifiers = {
         _notifier_map.get(subscription.key)
