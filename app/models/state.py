@@ -5,7 +5,7 @@ from uuid import UUID
 
 from pydantic import validator
 from .base import VersionedBaseModel
-from .subscription import notify
+from .notification import notify
 from .project import get as get_project
 from ..cascade_types import FLAG_VALUE_TYPE, FLAG_VALUE_TYPE_NAMES, convert
 from ..exceptions import DoesNotExist, RevisionMismatch

@@ -4,7 +4,8 @@ from fastapi import APIRouter, HTTPException
 from starlette.websockets import WebSocket
 
 from ..exceptions import DoesNotExist
-from ..models.subscription import upsert, get_notifier
+from ..models.subscription import upsert
+from ..models.notification import get_notifier
 
 router = APIRouter()
 TAGS = ["Subscriptions"]
