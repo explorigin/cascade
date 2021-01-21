@@ -21,11 +21,11 @@ A flag is one datum that can be relevant across products or just one product tha
 
 ## Running the service
 
-1. `docker-compose up -d`
+1. `docker-compose -f docker-compose.dynamo.yaml up -d`
 2. `yarn install`
 3. `yarn start`
 
-NOTE: The `bootstrap` service merely initializes the database and then exits. It is normal for it to not stay running.
+NOTE: Replace `docker-compose.dynamo.yaml` with any of the other yaml files for different backend configurations.
 
 Running this will give you an example app running at [http://localhost:8000](http://localhost:8000)
 
@@ -33,14 +33,14 @@ Running this will give you an example app running at [http://localhost:8000](htt
 
 Cascade can be configured with a few environment variables:
 
-- `cascade_backend` - Sets the Python path for the selected backend. Each backend has it's own set of environment variables for further configuration.
-- `cascade_initialize` - Boolean - Should the tables be created
+- `cascade_backend` - Sets the Python path for the selected backend. Each backend has its own set of environment variables for further configuration.
+- `cascade_initialize` - Boolean - Should the backend be initialized (what this means is specific to the backend)
 
 ### Backends
 
 #### DynamoDB
 
-Set `cascade_backend` to `app.backends.dynamodb.Backend`
+Set `cascade_backend` to `app.backends.dynamodb.Backend`. See `docker-compose.dynamo.yaml` as an example setup.
 
 ##### Environment Variables
 
@@ -48,8 +48,6 @@ Set `cascade_backend` to `app.backends.dynamodb.Backend`
  - `AWS_SECRET_ACCESS_KEY` - AWS API Secret
  - `DYNAMO_REGION` - AWS Region for dynamo tables
  - `DYNAMO_ENDPOINT` - Endpoint for dynamo server
- - `DYNAMO_DEFAULT_READ` - Default read units for tables
- - `DYNAMO_DEFAULT_WRITE` - Default write units for tables
  
 ## Development
 
