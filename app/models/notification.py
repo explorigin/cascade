@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Mapping
 
 from fastapi.encoders import jsonable_encoder
 from rule_engine import Rule
@@ -76,24 +76,30 @@ def get_notifier():
     return notifier
 
 
-async def notify(project_key: str, environment_key: str, flag_key: str, value: FLAG_VALUE_TYPE):
+async def notify(project_key: str, environment_key: str, values: Mapping[str, FLAG_VALUE_TYPE]):
     subscriptions = Subscription.query(
-        Rule(f"project == '{project_key}' and environment == '{environment_key}' and '{flag_key}' in flags")
+        Rule(f"project == '{project_key}' and environment == '{environment_key}'")
     )
+
     notifiers = {
-        _notifier_map.get(subscription.key)
+        (_notifier_map.get(subscription.key), subscription)
         for subscription in subscriptions
         if subscription.key in _notifier_map  # only if it exists
     }
 
     # Notify known subscriptions
-    for n in notifiers:
-        await n.notify({
+    for notifier, subscription in notifiers:
+        data = {
+            key: jsonable_encoder({"value": value})
+            for key, value in values
+            if key in subscription.flags
+        }
+        if not data:
+            continue
+        await notifier.notify({
             "project": project_key,
             "environment": environment_key,
-            "data": {
-                flag_key: jsonable_encoder({"value": value})
-            }
+            "data": data
         })
 
     # Clean up stale subscriptions
