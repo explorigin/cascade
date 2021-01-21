@@ -81,17 +81,17 @@ async def notify(project_key: str, environment_key: str, values: Mapping[str, FL
         Rule(f"project == '{project_key}' and environment == '{environment_key}'")
     )
 
-    notifiers = {
+    notifiers = [
         (_notifier_map.get(subscription.key), subscription)
         for subscription in subscriptions
         if subscription.key in _notifier_map  # only if it exists
-    }
+    ]
 
     # Notify known subscriptions
     for notifier, subscription in notifiers:
         data = {
             key: jsonable_encoder({"value": value})
-            for key, value in values
+            for key, value in values.items()
             if key in subscription.flags
         }
         if not data:

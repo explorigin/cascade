@@ -1,0 +1,39 @@
+version: "2"
+services:
+  bootstrap:
+    build: ./
+    image: cascade
+    working_dir: /application
+    environment:
+      SQLITE_DB: "sqlite.db"
+      cascade_backend: "app.backends.sqlite.Backend"
+      cascade_initialize: "true"
+    volumes:
+      - ./:/application
+    command: ['python', '-c', 'from debug import bootstrap_tables; bootstrap_tables()']
+    networks:
+      cascade:
+        aliases:
+          - bootstrap
+  cascade:
+    build: ./
+    image: cascade
+    working_dir: /application
+    depends_on:
+      - bootstrap
+    ports:
+      - "8001:8001"
+    environment:
+      SQLITE_DB: "sqlite.db"
+      cascade_backend: "app.backends.sqlite.Backend"
+    volumes:
+      - ./:/application
+    command: 'uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload'
+    networks:
+      cascade:
+        aliases:
+          - cascade-dev
+
+networks:
+  cascade:
+    driver: "bridge"
