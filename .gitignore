@@ -3,4 +3,4 @@
 .pyc
 __pycache__
 node_modules
-sqlite.db
+.db

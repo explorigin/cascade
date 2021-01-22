@@ -2,8 +2,8 @@ from typing import Optional, Dict, List
 
 from uuid import UUID
 
-
 from pydantic import validator
+
 from .base import VersionedBaseModel
 from .notification import notify
 from .project import get as get_project

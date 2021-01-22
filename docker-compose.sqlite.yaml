@@ -6,7 +6,7 @@ services:
     working_dir: /application
     environment:
       SQLITE_DB: "sqlite.db"
-      cascade_backend: "app.backends.sqlite.Backend"
+      cascade_backends: '{"default": "app.backends.sqlite.Backend"}'
       cascade_initialize: "true"
     volumes:
       - ./:/application
@@ -24,8 +24,8 @@ services:
     ports:
       - "8001:8001"
     environment:
-      SQLITE_DB: "sqlite.db"
-      cascade_backend: "app.backends.sqlite.Backend"
+      SQLITE_DB: "cascade.db"
+      cascade_backends: '{"default": "app.backends.sqlite.Backend"}'
     volumes:
       - ./:/application
     command: 'uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload'

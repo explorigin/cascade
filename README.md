@@ -33,14 +33,23 @@ Running this will give you an example app running at [http://localhost:8000](htt
 
 Cascade can be configured with a few environment variables:
 
-- `cascade_backend` - Sets the Python path for the selected backend. Each backend has its own set of environment variables for further configuration.
+- `cascade_backends` - Maps models to different backends. Each backend has its own set of environment variables for further configuration.
 - `cascade_initialize` - Boolean - Should the backend be initialized (what this means is specific to the backend)
 
 ### Backends
 
+You can mix multiple backends. by specifying different models in `cascade_backends`. Here's an example that uses SQLite for subscriptions and Dynamo for everything else:
+
+```{"subscription": "app.backends.sqlite.Backend", "default": "app.backends.dynamodb.Backend"}```
+
+Possible models are:
+ - `subscription`
+ - `project`
+ - `state`
+
 #### DynamoDB
 
-Set `cascade_backend` to `app.backends.dynamodb.Backend`. See `docker-compose.dynamo.yaml` as an example setup.
+Set `cascade_backends` to `{"default": "app.backends.dynamodb.Backend"}`. See `docker-compose.dynamo.yaml` as an example setup.
 
 ##### Environment Variables
 
@@ -48,6 +57,14 @@ Set `cascade_backend` to `app.backends.dynamodb.Backend`. See `docker-compose.dy
  - `AWS_SECRET_ACCESS_KEY` - AWS API Secret
  - `DYNAMO_REGION` - AWS Region for dynamo tables
  - `DYNAMO_ENDPOINT` - Endpoint for dynamo server
+
+#### SQLite
+
+Set `cascade_backends` to `{"default": "app.backends.sqlite.Backend"}`. See `docker-compose.sqlite.yaml` as an example setup.
+
+##### Environment Variables
+
+ - `SQLITE_DB` - The database file to use
  
 ## Development
 

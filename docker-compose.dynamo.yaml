@@ -19,7 +19,7 @@ services:
       AWS_ACCESS_KEY_ID: "default"
       AWS_SECRET_ACCESS_KEY: "default"
       DYNAMO_ENDPOINT: "http://cascade-dynamo:8002"
-      cascade_backend: "app.backends.dynamodb.Backend"
+      cascade_backends: '{"default": "app.backends.dynamodb.Backend"}'
       cascade_initialize: "true"
     volumes:
       - ./:/application
@@ -42,7 +42,7 @@ services:
       AWS_ACCESS_KEY_ID: "default"
       AWS_SECRET_ACCESS_KEY: "default"
       DYNAMO_ENDPOINT: "http://cascade-dynamo:8002"
-      cascade_backend: "app.backends.dynamodb.Backend"
+      cascade_backends: '{"default": "app.backends.dynamodb.Backend"}'
     volumes:
       - ./:/application
     command: 'uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload'
