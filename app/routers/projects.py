@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
+from ..context import extract_context
 from ..exceptions import DoesNotExist, RevisionMismatch
 from ..models.project import get, upsert, Project
 
@@ -8,6 +9,7 @@ TAGS = ["Project"]
 
 
 @router.get("/{project}", tags=TAGS)
+@extract_context
 async def get_project_details(project: str) -> Project:
     try:
         return get(project)
@@ -16,6 +18,7 @@ async def get_project_details(project: str) -> Project:
 
 
 @router.put("/", tags=TAGS)
+@extract_context
 async def create_or_change_project_definition(project: Project) -> Project:
     try:
         upsert(project)

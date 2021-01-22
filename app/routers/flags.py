@@ -7,7 +7,8 @@ from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
-from ..cascade_types import FLAG_VALUE_TYPE, FLAG_REVISIONED_VALUE_TYPE
+from ..context import extract_context
+from ..cascade_types import FLAG_VALUE_TYPE
 from ..models.state import get, set_value
 from ..exceptions import DoesNotExist, RevisionMismatch
 
@@ -16,6 +17,7 @@ TAGS = ["Flag"]
 
 
 @router.get("/{project}/{environment}/{flag}", tags=TAGS)
+@extract_context
 async def get_flag_value(project: str, environment: str, flag: str):
     """Get the latest value for the given flag in the given environment and project."""
 
@@ -26,8 +28,8 @@ async def get_flag_value(project: str, environment: str, flag: str):
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=str(e))
 
 
-
 @router.get("/{project}/{environment}", tags=TAGS)
+@extract_context
 async def get_state(project: str, environment: str):
     """Get the latest state for the given environment and project."""
 
@@ -39,6 +41,7 @@ async def get_state(project: str, environment: str):
 
 
 @router.put("/{project}/{environment}/{flag}", tags=TAGS, status_code=200)
+@extract_context
 async def set_flag_value(response: Response,
                          project: str,
                          environment: str,

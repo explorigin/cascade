@@ -3,6 +3,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException
 from starlette.websockets import WebSocket
 
+from ..context import extract_context
 from ..exceptions import DoesNotExist
 from ..models.subscription import upsert
 from ..models.notification import get_notifier
@@ -12,6 +13,7 @@ TAGS = ["Subscriptions"]
 
 
 @router.post("/{project}/{environment}", tags=TAGS, status_code=201)
+@extract_context
 async def subscribe(project: str, environment: str, flags: List[str]):
     try:
         subscription = upsert(project, environment, flags)
