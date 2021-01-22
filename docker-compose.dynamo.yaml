@@ -3,7 +3,7 @@ services:
   dynamo:
     image: dwmkerr/dynamodb
     ports:
-      - "8002:8002"
+      - "9002:9002"
     command: [' -jar', 'DynamoDBLocal.jar', '-port', '8002']
     networks:
       cascade:
@@ -18,7 +18,7 @@ services:
     environment:
       AWS_ACCESS_KEY_ID: "default"
       AWS_SECRET_ACCESS_KEY: "default"
-      DYNAMO_ENDPOINT: "http://cascade-dynamo:8002"
+      DYNAMO_ENDPOINT: "http://cascade-dynamo:9002"
       cascade_backends: '{"default": "app.backends.dynamodb.Backend"}'
       cascade_initialize: "true"
     volumes:
@@ -37,15 +37,15 @@ services:
     links:
       - dynamo
     ports:
-      - "8001:8001"
+      - "9001:9001"
     environment:
       AWS_ACCESS_KEY_ID: "default"
       AWS_SECRET_ACCESS_KEY: "default"
-      DYNAMO_ENDPOINT: "http://cascade-dynamo:8002"
+      DYNAMO_ENDPOINT: "http://cascade-dynamo:9002"
       cascade_backends: '{"default": "app.backends.dynamodb.Backend"}'
     volumes:
       - ./:/application
-    command: 'uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload'
+    command: 'uvicorn app.main:app --host 0.0.0.0 --port 9001 --reload'
     networks:
       cascade:
         aliases:

@@ -102,12 +102,12 @@ class Backend:
             for k, v in schema['properties'].items()
         }
 
-    def initialize(self, cls):
+    def initialize(self):
         field_defs = self.sql_field_defs()
-        field_defs[cls.Config.hash_key] += ' PRIMARY KEY'
+        field_defs[self.hash_key] += ' PRIMARY KEY'
         fields = ', '.join(f"{k} {v}" for k, v in field_defs.items())
         c = self._conn.cursor()
-        c.execute(f'''CREATE TABLE IF NOT EXISTS {cls.get_table_name()} ({fields})''')
+        c.execute(f'''CREATE TABLE IF NOT EXISTS {self.table_name} ({fields})''')
         c.close()
         return True
 

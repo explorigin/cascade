@@ -22,13 +22,13 @@ services:
     depends_on:
       - bootstrap
     ports:
-      - "8001:8001"
+      - "9001:9001"
     environment:
       SQLITE_DB: "cascade.db"
       cascade_backends: '{"default": "app.backends.sqlite.Backend"}'
     volumes:
       - ./:/application
-    command: 'uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload'
+    command: 'uvicorn app.main:app --host 0.0.0.0 --port 9001 --reload'
     networks:
       cascade:
         aliases:

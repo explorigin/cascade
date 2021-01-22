@@ -18,4 +18,4 @@ def bootstrap_tables():
 
 if __name__ == "__main__":
     bootstrap_tables()
-    uvicorn.run('app.main:app', host="0.0.0.0", port=8001, reload=True)
+    uvicorn.run('app.main:app', host="0.0.0.0", port=9001, reload=True)
